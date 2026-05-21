@@ -49,9 +49,21 @@ header .container {
 }
 
 .logo {
-    font-size: 1.5em;
-    font-weight: 700;
-    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.logo a {
+    display: flex;
+    align-items: center;
+}
+
+.logo img {
+    height: 48px;
+    width: auto;
+    mix-blend-mode: screen;
+    display: block;
 }
 
 nav {
@@ -486,7 +498,7 @@ nav ul li a:focus {
         grid-template-columns: 1fr;
     }
 
-    .logo {
-        font-size: 1.2em;
+    .logo img {
+        height: 38px;
     }
 }
