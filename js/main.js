@@ -6,17 +6,17 @@ const translations = {
     nav_startups: { es: 'Startups', en: 'Startups' },
     nav_investors: { es: 'Inversores', en: 'Investors' },
     nav_contact: { es: 'Contacto', en: 'Contact' },
-    hero_title: { es: 'Legetecno: Estudio Jurídico Tech & Holding de Startups', en: 'Legetecno: Tech Law Firm & Startup Holding' },
-    hero_subtitle: { es: 'Unimos derecho, tecnología y negocios con una visión innovadora y audaz.', en: 'We unite law, technology and business with an innovative and bold vision.' },
-    hero_cta: { es: 'Descubre más', en: 'Learn more' },
+    hero_title: { es: 'Legetecno: Derecho Tech para el mundo hispanohablante', en: 'Legetecno: Tech Law for the Spanish-Speaking World' },
+    hero_subtitle: { es: 'Asesoramos a empresas y startups de España, México, Argentina y toda Latinoamérica en el cruce entre derecho, tecnología e inteligencia artificial.', en: 'We advise companies and startups from Spain, Mexico, Argentina, and across Latin America at the intersection of law, technology, and artificial intelligence.' },
+    hero_cta: { es: 'Conocé nuestros servicios', en: 'Explore our services' },
     about_title: { es: 'Sobre Legetecno', en: 'About Legetecno' },
     about_text1: {
-        es: 'Somos un estudio jurídico especializado en derecho informático, con amplia experiencia en regulación tecnológica, nuevas tecnologías y transformación digital. Nuestro fundador, el Abog. Gustavo D. Asensio (especialista en Derecho Informático por la UBA), combina el rigor del derecho con la creatividad de las startups para ofrecer soluciones integrales.',
-        en: 'We are a law firm specializing in IT law, with extensive experience in technology regulation, emerging technologies and digital transformation. Our founder, Atty. Gustavo D. Asensio (IT Law specialist from UBA), combines legal rigor with startup creativity to offer comprehensive solutions.'
+        es: 'Somos un estudio jurídico especializado en derecho de las tecnologías, con presencia en el mercado hispanohablante global. Nuestro fundador, el Abog. Gustavo D. Asensio (especialista en Derecho Informático por la UBA), combina el rigor del derecho con la mentalidad de las startups para ofrecer soluciones integrales a empresas que operan en entornos digitales complejos.',
+        en: 'We are a law firm specializing in technology law, serving the global Spanish-speaking market. Our founder, Atty. Gustavo D. Asensio (IT Law specialist from UBA), combines legal rigor with a startup mindset to deliver comprehensive solutions for companies operating in complex digital environments.'
     },
     about_text2: {
-        es: 'Además de asesorar a empresas en transformación digital y cumplimiento normativo, dirigimos un holding que impulsa proyectos tecnológicos de alto impacto (nuestro "Proyecto Unicornio 🦄"), brindando apoyo legal y estratégico para convertir ideas innovadoras en negocios sostenibles.',
-        en: 'In addition to advising companies on digital transformation and regulatory compliance, we run a holding that drives high‑impact technological projects (our "Unicorn Project 🦄"), providing legal and strategic support to turn innovative ideas into sustainable businesses.'
+        es: 'Más allá de la asesoría jurídica, gestionamos un holding de proyectos legaltech de alto impacto: desde herramientas de IA legal hasta plataformas de comercio exterior. Acompañamos cada proyecto desde la incubación hasta el crecimiento, aportando know-how legal, estratégico y de producto para el mercado hispanohablante global.',
+        en: 'Beyond legal advisory, we run a holding of high-impact legaltech projects — from legal AI tools to international trade platforms. We support each project from inception to growth, bringing legal, strategic, and product expertise to the global Spanish-speaking market.'
     },
     services_title: { es: 'Servicios', en: 'Services' },
     service_itlaw_title: { es: 'Derecho informático y privacidad', en: 'IT law and privacy' },
@@ -57,7 +57,7 @@ const translations = {
     },
     investors_cta: { es: 'Consultar por proyectos en cartera', en: 'Enquire about portfolio projects' },
     contact_title: { es: 'Contacto', en: 'Contact' },
-    contact_intro: { es: '¿Listo para trabajar con nosotros o explorar oportunidades de inversión? Ponte en contacto:', en: 'Ready to work with us or explore investment opportunities? Get in touch:' },
+    contact_intro: { es: '¿Listo para trabajar con nosotros o explorar oportunidades de inversión? Escribinos:', en: 'Ready to work with us or explore investment opportunities? Reach out:' },
     contact_email_label: { es: 'Email:', en: 'Email:' },
     contact_phone_label: { es: 'Teléfono:', en: 'Phone:' },
     contact_address_label: { es: 'Dirección:', en: 'Address:' },
