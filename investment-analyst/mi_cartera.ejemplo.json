@@ -1,0 +1,39 @@
+{
+  "cash_ars": 500000,
+  "cash_usd": 1500,
+  "ingreso_mensual_ars": 250000,
+  "horizonte_inversion": "mediano_plazo",
+  "objetivo": "crecimiento_capital",
+  "notas": "Editar con tu información real antes de ejecutar",
+  "holdings": [
+    {
+      "tipo": "cedear",
+      "ticker": "AAPL",
+      "cantidad": 15,
+      "precio_compra": 8200,
+      "moneda_compra": "ARS",
+      "fecha_compra": "2024-10-01"
+    },
+    {
+      "tipo": "bono",
+      "ticker": "GD30",
+      "cantidad": 200,
+      "precio_compra": 63.5,
+      "moneda_compra": "USD"
+    },
+    {
+      "tipo": "accion",
+      "ticker": "GGAL",
+      "cantidad": 800,
+      "precio_compra": 1150,
+      "moneda_compra": "ARS"
+    },
+    {
+      "tipo": "accion",
+      "ticker": "YPF",
+      "cantidad": 50,
+      "precio_compra": 22,
+      "moneda_compra": "USD"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+.env
+mi_cartera.json
+reporte_*.json
+__pycache__/
+*.pyc
+*.pyo
+.DS_Store
