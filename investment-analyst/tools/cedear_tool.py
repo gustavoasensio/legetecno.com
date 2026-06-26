@@ -45,6 +45,13 @@ def analyze_cedears(market_data: dict, capital_disponible_ars: float, perfil_rie
                     "cedears_comprables_con_capital": int(capital_disponible_ars / precio_ars_teorico) if precio_ars_teorico > 0 else 0,
                 })
 
+    sin_datos_live = len(cedears_data) == 0
+    datos_str = (
+        json.dumps(cedears_data, indent=2, ensure_ascii=False)
+        if cedears_data
+        else "⚠ Datos en tiempo real no disponibles (API externa sin acceso). Usa tu conocimiento actualizado del mercado para hacer las recomendaciones."
+    )
+
     resp = client.messages.create(
         model=ANALYST_MODEL,
         max_tokens=3000,
@@ -60,6 +67,8 @@ def analyze_cedears(market_data: dict, capital_disponible_ars: float, perfil_rie
         - Potencial de apreciación tanto del subyacente como del tipo de cambio
         - Sectores con mejor perspectiva: tech, energía, financiero, consumo
 
+        Cuando no hay datos en tiempo real, basá tus recomendaciones en tu conocimiento del
+        mercado pero indicá explícitamente que los precios deben verificarse antes de operar.
         Responde en español con análisis profesional.""",
         messages=[
             {
@@ -67,13 +76,13 @@ def analyze_cedears(market_data: dict, capital_disponible_ars: float, perfil_rie
                 "content": f"""Analiza estas oportunidades de CEDEARs para un inversor argentino:
 
 DATOS DEL MERCADO:
-- Dólar CCL: ${dolar_ccl:,.2f} ARS
+- Dólar CCL referencia: ${dolar_ccl:,.2f} ARS
 - Capital disponible: ${capital_disponible_ars:,.0f} ARS (≈ USD {capital_disponible_ars/dolar_ccl:,.0f})
 - Perfil de riesgo del inversor: {perfil_riesgo}
-- Fecha de análisis: hoy
+- Datos en tiempo real: {"NO disponibles — usar conocimiento propio" if sin_datos_live else "DISPONIBLES"}
 
-CEDEARS DISPONIBLES CON PRECIOS ACTUALIZADOS:
-{json.dumps(cedears_data, indent=2, ensure_ascii=False)}
+CEDEARS DISPONIBLES CON PRECIOS:
+{datos_str}
 
 Proporciona:
 1. TOP 5 CEDEARs recomendados con justificación detallada (fundamentos, momentum, valuación)

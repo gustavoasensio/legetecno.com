@@ -44,6 +44,13 @@ def analyze_acciones_argentinas(market_data: dict, capital_disponible_ars: float
                 "unidades_comprables": int(capital_disponible_ars / precio_en_ars) if precio_en_ars > 0 else 0,
             })
 
+    sin_datos_live = len(acciones_enriquecidas) == 0
+    acciones_str = (
+        json.dumps(acciones_enriquecidas, indent=2, ensure_ascii=False)
+        if acciones_enriquecidas
+        else "⚠ Datos en tiempo real no disponibles. Usa tu conocimiento actualizado del Merval."
+    )
+
     resp = client.messages.create(
         model=ANALYST_MODEL,
         max_tokens=3000,
@@ -56,21 +63,23 @@ def analyze_acciones_argentinas(market_data: dict, capital_disponible_ars: float
         - ADRs en NYSE vs acciones locales: paridad y oportunidades de arbitraje
         - Ciclo económico argentino y sus impactos sectoriales
 
-        Responde en español con análisis profesional y objetivo.""",
+        Cuando no hay datos en tiempo real, basá tus recomendaciones en conocimiento propio
+        pero indicá que los precios deben verificarse. Responde en español con análisis profesional y objetivo.""",
         messages=[
             {
                 "role": "user",
                 "content": f"""Analiza el mercado de acciones argentinas para recomendar posiciones:
 
 CONTEXTO MACROECONÓMICO:
-- Dólar CCL: ${dolar_ccl:,.2f} ARS
+- Dólar CCL referencia: ${dolar_ccl:,.2f} ARS
 - Inflación mensual: {inflacion.get('inflacion_mensual_pct', 'N/A')}%
 - Tasa política monetaria: {tasa_pm.get('tasa_pct_anual', 'N/A')}% anual
 - Reservas internacionales: ${reservas.get('reservas_millones_usd', 'N/A')} millones USD
 - Capital a invertir: ${capital_disponible_ars:,.0f} ARS
+- Datos en tiempo real: {"NO disponibles" if sin_datos_live else "DISPONIBLES"}
 
 ACCIONES DISPONIBLES CON DATOS ACTUALES:
-{json.dumps(acciones_enriquecidas, indent=2, ensure_ascii=False)}
+{acciones_str}
 
 PERFIL DEL INVERSOR: {perfil_riesgo}
 

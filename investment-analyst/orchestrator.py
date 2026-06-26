@@ -7,10 +7,9 @@ import json
 import sys
 from typing import Any
 from rich.console import Console
+from rich.markup import escape as rich_escape
 from rich.panel import Panel
-from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.table import Table
-from rich.text import Text
 
 from config import ORCHESTRATOR_MODEL
 from data.market_data import fetch_all_market_data
@@ -363,10 +362,6 @@ Por favor coordina todos los sub-agentes y dame el análisis completo con el pla
 
         messages.append({"role": "user", "content": tool_results})
 
-        # Mostrar stop_reason
-        if response.stop_reason == "end_turn":
-            break
-
     return results_cache
 
 
@@ -389,13 +384,16 @@ def _print_final_report(results: dict):
     )
 
     # Metadata
+    ccl = metadata.get("dolar_ccl")
+    patrimonio = metadata.get("patrimonio_total_ars", 0)
+    ccl_str = f"${float(ccl):,.2f}" if ccl is not None else "N/A"
     console.print(f"\n[dim]Generado: {metadata.get('fecha_generacion', 'N/A')}[/dim]")
-    console.print(f"[dim]Dólar CCL: ${metadata.get('dolar_ccl', 'N/A'):,.2f} | Patrimonio: ${metadata.get('patrimonio_total_ars', 0):,.0f} ARS | Perfil: {metadata.get('perfil_riesgo', 'N/A')}[/dim]\n")
+    console.print(f"[dim]Dólar CCL: {ccl_str} | Patrimonio: ${float(patrimonio):,.0f} ARS | Perfil: {metadata.get('perfil_riesgo', 'N/A')}[/dim]\n")
 
     # Resumen ejecutivo
     resumen = report.get("resumen_ejecutivo", "")
     if resumen:
-        console.print(Panel(resumen, title="[bold]Resumen Ejecutivo[/bold]", border_style="cyan"))
+        console.print(Panel(rich_escape(str(resumen)), title="[bold]Resumen Ejecutivo[/bold]", border_style="cyan"))
 
     # Operaciones inmediatas
     ops = report.get("operaciones_inmediatas", [])
@@ -413,13 +411,17 @@ def _print_final_report(results: dict):
         for i, op in enumerate(ops, 1):
             accion = op.get("accion", op.get("tipo", ""))
             color = "green" if "COMPRAR" in str(accion).upper() else "red" if "VENDER" in str(accion).upper() else "yellow"
+            monto_raw = op.get("monto_ars") or op.get("monto")
+            monto_str = f"${float(monto_raw):,.0f}" if monto_raw is not None else "-"
+            precio_raw = op.get("precio_maximo_entrada") or op.get("precio_entrada")
+            precio_str = f"${float(precio_raw):,.2f}" if precio_raw is not None else "-"
             tabla_ops.add_row(
                 str(i),
                 f"[{color}]{accion}[/{color}]",
                 str(op.get("ticker", op.get("simbolo", ""))),
-                f"${op.get('monto_ars', op.get('monto', 0)):,.0f}" if op.get("monto_ars") or op.get("monto") else "-",
+                monto_str,
                 str(op.get("cantidad", op.get("unidades", ""))),
-                f"${op.get('precio_maximo_entrada', op.get('precio_entrada', ''))}" if op.get("precio_maximo_entrada") or op.get("precio_entrada") else "-",
+                precio_str,
                 str(op.get("justificacion", op.get("razon", "")))[:50],
             )
         console.print(tabla_ops)
@@ -435,10 +437,13 @@ def _print_final_report(results: dict):
         tabla_dist.add_column("Objetivo")
 
         for item in dist:
+            monto_raw = item.get("monto_ars") or item.get("monto")
+            monto_str = f"${float(monto_raw):,.0f}" if monto_raw is not None else "-"
+            pct_raw = item.get("porcentaje") or item.get("pct", "")
             tabla_dist.add_row(
                 str(item.get("ticker", item.get("instrumento", ""))),
-                f"${item.get('monto_ars', item.get('monto', 0)):,.0f}" if item.get("monto_ars") or item.get("monto") else "-",
-                f"{item.get('porcentaje', item.get('pct', ''))}%",
+                monto_str,
+                f"{pct_raw}%",
                 str(item.get("objetivo", item.get("target", "")))[:40],
             )
         console.print(tabla_dist)
@@ -449,9 +454,11 @@ def _print_final_report(results: dict):
         console.print("\n[bold cyan]OBJETIVOS DE RENDIMIENTO[/bold cyan]")
         for escenario, datos in objetivos.items():
             if isinstance(datos, dict):
-                console.print(f"  [bold]{escenario.upper()}:[/bold] ARS: {datos.get('rendimiento_ars', '')} | USD: {datos.get('rendimiento_usd', '')}")
+                ars = rich_escape(str(datos.get("rendimiento_ars", "")))
+                usd = rich_escape(str(datos.get("rendimiento_usd", "")))
+                console.print(f"  [bold]{escenario.upper()}:[/bold] ARS: {ars} | USD: {usd}")
             else:
-                console.print(f"  [bold]{escenario.upper()}:[/bold] {datos}")
+                console.print(f"  [bold]{escenario.upper()}:[/bold] {rich_escape(str(datos))}")
 
     # Alertas
     alertas = report.get("alertas_seguimiento", [])
@@ -459,17 +466,19 @@ def _print_final_report(results: dict):
         console.print("\n[bold yellow]⚠ ALERTAS DE SEGUIMIENTO[/bold yellow]")
         for alerta in alertas:
             if isinstance(alerta, dict):
-                console.print(f"  • [bold]{alerta.get('indicador', alerta.get('nombre', ''))}[/bold]: {alerta.get('descripcion', alerta.get('accion', ''))}")
+                nombre = rich_escape(str(alerta.get("indicador", alerta.get("nombre", ""))))
+                desc = rich_escape(str(alerta.get("descripcion", alerta.get("accion", ""))))
+                console.print(f"  • [bold]{nombre}[/bold]: {desc}")
             else:
-                console.print(f"  • {alerta}")
+                console.print(f"  • {rich_escape(str(alerta))}")
 
     # Próxima revisión
     revision = report.get("proxima_revision", {})
     if revision:
         console.print("\n[bold]PRÓXIMA REVISIÓN[/bold]")
         if isinstance(revision, dict):
-            console.print(f"  Fecha: {revision.get('fecha', 'N/A')}")
+            console.print(f"  Fecha: {rich_escape(str(revision.get('fecha', 'N/A')))}")
             for item in revision.get("agenda", []):
-                console.print(f"  • {item}")
+                console.print(f"  • {rich_escape(str(item))}")
         else:
-            console.print(f"  {revision}")
+            console.print(f"  {rich_escape(str(revision))}")

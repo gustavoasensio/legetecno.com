@@ -36,7 +36,6 @@ def analyze_portfolio(portfolio: dict, market_data: dict) -> dict:
     # Valorizar la cartera actual
     holdings_valorados = []
     total_ars = portfolio.get("cash_ars", 0)
-    total_usd = portfolio.get("cash_usd", 0)
 
     for holding in portfolio.get("holdings", []):
         tipo = holding.get("tipo", "")
