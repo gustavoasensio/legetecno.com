@@ -2,9 +2,13 @@
 Cliente oficial de la API de Portfolio Personal Inversiones (PPI).
 Docs: https://clientapi.portfoliopersonal.com/swagger
 
-Credenciales necesarias en .env:
-  PPI_PUBLIC_KEY   → la "Key pública" de tu cuenta PPI
-  PPI_PRIVATE_KEY  → la "Key privada" (pedila a api@portfoliopersonal.com si la perdiste)
+Credenciales en .env:
+  PPI_PUBLIC_KEY    → "Key pública" de tu cuenta PPI
+  PPI_PRIVATE_KEY   → "Key privada" (pedila a api@portfoliopersonal.com si la perdiste)
+
+Credenciales de aplicación (fijas para todos los usuarios REST — no son secretas):
+  AuthorizedClient: API_CLI_REST
+  ClientKey:        pp19CliApp12
 """
 import httpx
 import json
@@ -12,7 +16,13 @@ import os
 from datetime import datetime, timedelta
 from typing import Optional
 
-PPI_BASE_URL = "https://clientapi.portfoliopersonal.com"
+PPI_BASE_URL_PROD    = "https://clientapi.portfoliopersonal.com"
+PPI_BASE_URL_SANDBOX = "https://sandboxclientapi.portfoliopersonal.com"
+
+# Credenciales de aplicación REST (compartidas por todos los usuarios de la API)
+PPI_AUTHORIZED_CLIENT = "API_CLI_REST"
+PPI_CLIENT_KEY_PROD    = "pp19CliApp12"
+PPI_CLIENT_KEY_SANDBOX = "ppApiCliSB"
 
 
 class PPIAuthError(Exception):
@@ -20,19 +30,44 @@ class PPIAuthError(Exception):
 
 
 class PPIClient:
-    def __init__(self, public_key: str = None, private_key: str = None):
-        self.public_key = public_key or os.getenv("PPI_PUBLIC_KEY", "")
-        self.private_key = private_key or os.getenv("PPI_PRIVATE_KEY", "")
+    def __init__(
+        self,
+        public_key: str = None,
+        private_key: str = None,
+        sandbox: bool = None,
+    ):
+        # sandbox=None → usa PPI_SANDBOX env var; True/False → fuerza modo
+        if sandbox is None:
+            sandbox = os.getenv("PPI_SANDBOX", "false").lower() == "true"
+
+        self.sandbox = sandbox
+        self.base_url = PPI_BASE_URL_SANDBOX if sandbox else PPI_BASE_URL_PROD
+        self.client_key = PPI_CLIENT_KEY_SANDBOX if sandbox else PPI_CLIENT_KEY_PROD
+
+        # Claves de usuario: sandbox o producción según modo
+        if sandbox:
+            self.public_key = public_key or os.getenv("PPI_SANDBOX_PUBLIC_KEY", "")
+            self.private_key = private_key or os.getenv("PPI_SANDBOX_PRIVATE_KEY", "")
+        else:
+            self.public_key = public_key or os.getenv("PPI_PUBLIC_KEY", "")
+            self.private_key = private_key or os.getenv("PPI_PRIVATE_KEY", "")
+
         self._token: Optional[str] = None
         self._token_expires: Optional[datetime] = None
 
-        if not self.public_key or not self.private_key:
-            raise PPIAuthError(
-                "Faltan credenciales PPI. "
-                "Configurá PPI_PUBLIC_KEY y PPI_PRIVATE_KEY en el archivo .env"
-            )
+        if not self.public_key:
+            env_var = "PPI_SANDBOX_PUBLIC_KEY" if sandbox else "PPI_PUBLIC_KEY"
+            raise PPIAuthError(f"Falta {env_var} en el archivo .env")
 
     # ── Autenticación ─────────────────────────────────────────────────────────
+
+    def _app_headers(self) -> dict:
+        """Headers de identificación de aplicación — van en TODOS los requests."""
+        return {
+            "AuthorizedClient": PPI_AUTHORIZED_CLIENT,
+            "ClientKey": self.client_key,
+            "Content-Type": "application/json",
+        }
 
     def _is_token_valid(self) -> bool:
         if not self._token or not self._token_expires:
@@ -42,18 +77,19 @@ class PPIClient:
     def authenticate(self) -> bool:
         """Obtiene JWT de acceso usando las credenciales de API."""
         try:
+            body = {"PublicKey": self.public_key}
+            if self.private_key:
+                body["PrivateKey"] = self.private_key
+
             resp = httpx.post(
-                f"{PPI_BASE_URL}/api/OAuth/LoginApi",
-                json={
-                    "PublicKey": self.public_key,
-                    "PrivateKey": self.private_key,
-                },
+                f"{self.base_url}/api/OAuth/LoginApi",
+                headers=self._app_headers(),
+                json=body,
                 timeout=15,
             )
 
             if resp.status_code == 200:
                 data = resp.json()
-                # PPI puede devolver el token bajo distintas claves
                 self._token = (
                     data.get("AccessToken")
                     or data.get("access_token")
@@ -65,7 +101,7 @@ class PPIClient:
                 return bool(self._token)
             else:
                 raise PPIAuthError(
-                    f"PPI auth falló [{resp.status_code}]: {resp.text[:300]}"
+                    f"PPI auth falló [{resp.status_code}]: {resp.text[:400]}"
                 )
         except PPIAuthError:
             raise
@@ -85,7 +121,7 @@ class PPIClient:
     def _get(self, path: str, params: dict = None) -> dict | list:
         self._ensure_auth()
         resp = httpx.get(
-            f"{PPI_BASE_URL}{path}",
+            f"{self.base_url}{path}",
             headers=self._headers(),
             params=params or {},
             timeout=20,
@@ -95,7 +131,7 @@ class PPIClient:
             self._token = None
             self.authenticate()
             resp = httpx.get(
-                f"{PPI_BASE_URL}{path}",
+                f"{self.base_url}{path}",
                 headers=self._headers(),
                 params=params or {},
                 timeout=20,
