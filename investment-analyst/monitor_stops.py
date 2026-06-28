@@ -19,27 +19,19 @@ def cargar_cartera():
 
 
 def get_precios(tickers):
-    """Intenta PPI primero, devuelve dict ticker→precio_usd."""
-    precios = {}
-    pub = os.getenv("PPI_PUBLIC_KEY", "")
-    priv = os.getenv("PPI_PRIVATE_KEY", "")
-
-    if pub and priv:
-        try:
-            sys.path.insert(0, str(BASE_DIR))
-            from data.ppi_client import PPIClient
-            client = PPIClient(pub, priv)
-            client.authenticate()
-            dolar = cargar_cartera().get("dolar_mep_referencia", 1499)
-            for ticker in tickers:
-                p = client.get_cedear_price(ticker)
-                if p.get("precio"):
-                    precios[ticker] = p["precio"] / dolar
-            print(f"  Precios obtenidos de PPI: {list(precios.keys())}")
-        except Exception as e:
-            print(f"  PPI no disponible: {e}")
-
-    return precios
+    """Obtiene precios en USD via Yahoo Finance (BYMA). Sin API key."""
+    try:
+        sys.path.insert(0, str(BASE_DIR))
+        from data.market_data import get_prices_bulk, get_dolar_mep
+        dolar = get_dolar_mep() or cargar_cartera().get("dolar_mep_referencia", 1499)
+        precios_ars = get_prices_bulk(tickers, dolar_mep=dolar)
+        precios_usd = {t: p / dolar for t, p in precios_ars.items()}
+        if precios_usd:
+            print(f"  Precios de Yahoo Finance: {list(precios_usd.keys())}")
+        return precios_usd
+    except Exception as e:
+        print(f"  Yahoo Finance no disponible: {e}")
+        return {}
 
 
 def monitorear():

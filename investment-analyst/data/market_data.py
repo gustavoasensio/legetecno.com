@@ -1,11 +1,90 @@
 """
-Capa de datos de mercado: fetches precios reales de APIs gratuitas.
+Capa de datos de mercado: precios gratuitos sin API key.
+- Yahoo Finance via httpx directo (sin pandas/yfinance)
+- dolarapi.com para MEP, CCL, Blue
+- BCRA API para macro
 """
 import httpx
-import yfinance as yf
 from datetime import datetime, timedelta
 from typing import Optional
 import json
+
+YAHOO_CHART_URL = "https://query1.finance.yahoo.com/v8/finance/chart/{ticker}"
+DOLAR_API_URL = "https://dolarapi.com/v1/dolares/{tipo}"
+YAHOO_HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "Accept": "application/json",
+}
+
+
+def get_price_yahoo(ticker: str) -> Optional[float]:
+    """
+    Precio de mercado via Yahoo Finance (sin yfinance, sin pandas).
+    ticker puede ser 'ASML.BA' (BYMA en ARS) o 'ASML' (Nasdaq en USD).
+    """
+    try:
+        resp = httpx.get(
+            YAHOO_CHART_URL.format(ticker=ticker),
+            headers=YAHOO_HEADERS,
+            timeout=10,
+            follow_redirects=True,
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        result = data["chart"]["result"]
+        if not result:
+            return None
+        return result[0]["meta"]["regularMarketPrice"]
+    except Exception:
+        return None
+
+
+def get_cedear_price(ticker: str) -> dict:
+    """
+    Precio de un CEDEAR en BYMA (ARS) via Yahoo Finance.
+    Intenta primero ticker.BA (BYMA), devuelve precio_ars si hay.
+    """
+    precio = get_price_yahoo(f"{ticker}.BA")
+    if precio:
+        return {"ticker": ticker, "precio_ars": precio, "fuente": "Yahoo/BYMA"}
+
+    precio_usd = get_price_yahoo(ticker)
+    if precio_usd:
+        return {"ticker": ticker, "precio_ars": None, "precio_usd": precio_usd, "fuente": "Yahoo/USD"}
+
+    return {"ticker": ticker, "precio_ars": None, "fuente": None, "error": "no disponible"}
+
+
+def get_prices_bulk(tickers: list, dolar_mep: float = None) -> dict:
+    """
+    Precios de múltiples tickers en ARS.
+    Si no hay precio .BA, convierte USD usando dolar_mep.
+    Devuelve dict: {ticker: precio_ars}.
+    """
+    precios = {}
+    for ticker in tickers:
+        r = get_cedear_price(ticker)
+        if r.get("precio_ars"):
+            precios[ticker] = r["precio_ars"]
+        elif r.get("precio_usd") and dolar_mep:
+            precios[ticker] = r["precio_usd"] * dolar_mep
+    return precios
+
+
+def get_dolar_simple(tipo: str = "mep") -> Optional[float]:
+    """Tipo de cambio directo desde dolarapi.com. tipo: mep, ccl, blue, oficial."""
+    try:
+        resp = httpx.get(
+            DOLAR_API_URL.format(tipo=tipo),
+            headers=YAHOO_HEADERS,
+            timeout=8,
+            follow_redirects=True,
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        return data.get("venta") or data.get("compra")
+    except Exception:
+        return None
 
 
 def get_dolar_tipos() -> dict:
@@ -59,6 +138,11 @@ def get_dolar_tipos() -> dict:
 
 def get_dolar_mep() -> Optional[float]:
     """Retorna el tipo de cambio MEP/Bolsa."""
+    # Intenta endpoint directo primero (más rápido)
+    val = get_dolar_simple("mep")
+    if val:
+        return val
+    # Fallback: endpoint de lista
     tipos = get_dolar_tipos()
     mep = tipos.get("bolsa") or tipos.get("mep")
     if mep:
@@ -68,6 +152,9 @@ def get_dolar_mep() -> Optional[float]:
 
 def get_dolar_ccl() -> Optional[float]:
     """Retorna el tipo de cambio CCL (Contado Con Liquidación)."""
+    val = get_dolar_simple("ccl")
+    if val:
+        return val
     tipos = get_dolar_tipos()
     ccl = tipos.get("contado con liquidacion") or tipos.get("ccl")
     if ccl:

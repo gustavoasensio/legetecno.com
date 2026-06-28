@@ -27,25 +27,18 @@ def cargar_cartera() -> dict:
         return json.load(f)
 
 
-def get_precios_ppi(tickers: list) -> dict:
-    """Intenta obtener precios reales de PPI. Devuelve {} si no hay credenciales."""
-    pub = os.getenv("PPI_PUBLIC_KEY", "")
-    priv = os.getenv("PPI_PRIVATE_KEY", "")
-    if not pub or not priv:
-        return {}
+def get_precios_mercado(tickers: list) -> dict:
+    """Obtiene precios de CEDEARs en ARS via Yahoo Finance (gratis, sin API key)."""
     try:
         sys.path.insert(0, str(BASE_DIR))
-        from data.ppi_client import PPIClient
-        client = PPIClient(pub, priv)
-        client.authenticate()
-        precios = {}
-        for ticker in tickers:
-            p = client.get_cedear_price(ticker)
-            if p.get("precio"):
-                precios[ticker] = p["precio"]
+        from data.market_data import get_prices_bulk, get_dolar_mep
+        dolar = get_dolar_mep()
+        precios = get_prices_bulk(tickers, dolar_mep=dolar)
+        if precios:
+            print(f"  Precios obtenidos de Yahoo Finance: {list(precios.keys())}")
         return precios
     except Exception as e:
-        print(f"[PPI] No se pudieron obtener precios: {e}")
+        print(f"[Market] No se pudieron obtener precios: {e}")
         return {}
 
 
@@ -123,7 +116,7 @@ def analizar(cartera: dict, precios_ppi: dict) -> dict:
             "cantidad": cantidad,
             "entrada_usd": entrada,
             "precio_actual_usd": round(precio_actual_usd, 4) if precio_actual_usd else None,
-            "precio_actual_fuente": "PPI" if precio_actual else "entrada",
+            "precio_actual_fuente": "Yahoo" if precio_actual else "entrada",
             "capital_pos_usd": round(capital_pos, 2),
             "pct_portfolio": round(pct_portfolio, 1),
             "pnl_usd": round(pnl_usd, 2),
@@ -217,10 +210,10 @@ def imprimir_reporte(data: dict):
               f"{riesgo_str:>9} {rr_str:>5} {p['dias_en_posicion']:>5}")
 
     print(linea)
-    if any(p["precio_actual_fuente"] == "PPI" for p in pos):
-        print("  * precio de PPI en tiempo real")
+    if any(p["precio_actual_fuente"] == "Yahoo" for p in pos):
+        print("  * precio de Yahoo Finance / BYMA en tiempo real")
     else:
-        print("  Precios: usando precio de entrada (configurá PPI para precios reales)")
+        print("  Precios: usando precio de entrada (sin conexión a Yahoo Finance)")
 
     print()
     print("  ALERTAS")
@@ -256,8 +249,8 @@ if __name__ == "__main__":
 
     tickers = [h["ticker"] for h in cartera.get("holdings", []) if h.get("cantidad", 0) > 0]
 
-    print("Buscando precios en PPI..." if os.getenv("PPI_PRIVATE_KEY") else "Sin PPI configurado, usando precios de entrada.")
-    precios = get_precios_ppi(tickers)
+    print("Buscando precios en Yahoo Finance (BYMA)...")
+    precios = get_precios_mercado(tickers)
 
     data = analizar(cartera, precios)
     imprimir_reporte(data)
