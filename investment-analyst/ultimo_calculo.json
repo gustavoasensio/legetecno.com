@@ -1,0 +1,60 @@
+{
+  "fecha_calculo": "2026-06-28T22:37:49.194471",
+  "capital_total_usd": 19800,
+  "capital_invertido_usd": 1460.37,
+  "capital_libre_usd": 18339.63,
+  "pct_invertido": 7.4,
+  "pct_cash": 92.6,
+  "posiciones": [
+    {
+      "ticker": "MELI",
+      "cantidad": 69,
+      "entrada_usd": 14.09,
+      "precio_actual_usd": 14.09,
+      "precio_actual_fuente": "entrada",
+      "capital_pos_usd": 972.21,
+      "pct_portfolio": 4.9,
+      "pnl_usd": 0.0,
+      "pnl_pct": 0.0,
+      "stop_usd": 13.37,
+      "distancia_stop_pct": 5.1,
+      "riesgo_si_stop_usd": 49.68,
+      "target_usd": 16.9,
+      "ganancia_si_target_usd": 193.89,
+      "rr_ratio": 3.9,
+      "dias_en_posicion": 9,
+      "comision_entrada_usd": 7.06
+    },
+    {
+      "ticker": "MRVL",
+      "cantidad": 24,
+      "entrada_usd": 20.34,
+      "precio_actual_usd": 20.34,
+      "precio_actual_fuente": "entrada",
+      "capital_pos_usd": 488.16,
+      "pct_portfolio": 2.5,
+      "pnl_usd": 0.0,
+      "pnl_pct": 0.0,
+      "stop_usd": 18.3,
+      "distancia_stop_pct": 10.0,
+      "riesgo_si_stop_usd": 48.96,
+      "target_usd": 26.0,
+      "ganancia_si_target_usd": 135.84,
+      "rr_ratio": 2.77,
+      "dias_en_posicion": 3,
+      "comision_entrada_usd": 3.54
+    }
+  ],
+  "riesgo_total_si_todos_stops_usd": 98.64,
+  "riesgo_pct_portfolio": 0.5,
+  "ganancia_potencial_total_usd": 329.73,
+  "perdidas_realizadas_junio_usd": -767.8,
+  "comisiones_estimadas_junio_usd": 261.36,
+  "dolar_mep_usado": 1499,
+  "reglas": {
+    "max_riesgo_por_op_pct": 1.5,
+    "max_riesgo_total_pct": 6.0,
+    "rr_minimo": 2.0,
+    "estado_riesgo": "OK"
+  }
+}
