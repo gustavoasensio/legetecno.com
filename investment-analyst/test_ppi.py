@@ -10,34 +10,42 @@ from dotenv import load_dotenv
 load_dotenv()
 
 def test_ppi():
+    sandbox = os.getenv("PPI_SANDBOX", "false").lower() == "true"
+    modo = "SANDBOX" if sandbox else "PRODUCCIÓN"
+
     print("=" * 60)
-    print("DIAGNÓSTICO DE CONEXIÓN PPI")
+    print(f"DIAGNÓSTICO DE CONEXIÓN PPI ({modo})")
     print("=" * 60)
 
-    pub = os.getenv("PPI_PUBLIC_KEY", "")
-    priv = os.getenv("PPI_PRIVATE_KEY", "")
+    if sandbox:
+        pub = os.getenv("PPI_SANDBOX_PUBLIC_KEY", "")
+        priv = os.getenv("PPI_SANDBOX_PRIVATE_KEY", "")
+        env_pub = "PPI_SANDBOX_PUBLIC_KEY"
+        env_priv = "PPI_SANDBOX_PRIVATE_KEY"
+    else:
+        pub = os.getenv("PPI_PUBLIC_KEY", "")
+        priv = os.getenv("PPI_PRIVATE_KEY", "")
+        env_pub = "PPI_PUBLIC_KEY"
+        env_priv = "PPI_PRIVATE_KEY"
 
     if not pub:
-        print("ERROR: PPI_PUBLIC_KEY no configurada en .env")
-        print("  → Copiá .env.example a .env y completá las claves")
+        print(f"ERROR: {env_pub} no configurada en .env")
         sys.exit(1)
 
     if not priv:
-        print("ERROR: PPI_PRIVATE_KEY no configurada en .env")
-        print("  → Si la perdiste, escribí a api@portfoliopersonal.com")
+        print(f"ERROR: {env_priv} no configurada en .env")
         sys.exit(1)
 
     print(f"  Public key: {pub[:8]}...{pub[-4:]} ✓")
     print(f"  Private key: {'*' * 20} ✓")
     print()
 
-    # Importar cliente
     sys.path.insert(0, os.path.dirname(__file__))
     from data.ppi_client import PPIClient, PPIAuthError
 
     print("1. Autenticando con PPI...")
     try:
-        client = PPIClient(pub, priv)
+        client = PPIClient()  # Lee sandbox mode y claves desde env
         ok = client.authenticate()
         if ok:
             print("   ✓ Autenticación exitosa")
@@ -56,7 +64,7 @@ def test_ppi():
         for acc in accounts:
             print(f"     → {acc}")
     else:
-        print("   ⚠ No se encontraron cuentas (puede ser normal)")
+        print("   ⚠ No se encontraron cuentas (puede ser normal en sandbox)")
 
     print()
     print("3. Obteniendo portfolio...")
