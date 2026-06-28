@@ -1,0 +1,67 @@
+{
+  "_instrucciones": "Actualizá este archivo con tus posiciones reales. Si configurás PPI_PRIVATE_KEY, se actualiza automático.",
+  "_ultima_actualizacion": "2026-06-28",
+
+  "capital_total_usd": 19800,
+  "dolar_mep_referencia": 1499,
+  "dolar_ccl_referencia": 1260,
+
+  "cash_usd": 0,
+  "cash_ars": 0,
+
+  "holdings": [
+    {
+      "ticker": "MELI",
+      "nombre": "MercadoLibre Inc.",
+      "tipo": "cedear",
+      "moneda": "USD",
+      "cantidad": 69,
+      "precio_entrada_usd": 14.09,
+      "fecha_entrada": "2026-06-19",
+      "stop_loss_usd": 13.37,
+      "target_usd": 16.90,
+      "tesis": "Líder regional e-commerce + fintech, crecimiento MELI Pago"
+    },
+    {
+      "ticker": "MRVL",
+      "nombre": "Marvell Technology",
+      "tipo": "cedear",
+      "moneda": "USD",
+      "cantidad": 24,
+      "precio_entrada_usd": 20.34,
+      "fecha_entrada": "2026-06-25",
+      "stop_loss_usd": 18.30,
+      "target_usd": 26.00,
+      "tesis": "Semiconductores AI networking, custom ASICs para data centers"
+    },
+    {
+      "_COMPLETAR": "Actualizá ticker, cantidad y precio real de NKE si seguís teniendo la posición",
+      "ticker": "NKE",
+      "nombre": "Nike Inc.",
+      "tipo": "cedear",
+      "moneda": "USD",
+      "cantidad": 0,
+      "precio_entrada_usd": 0,
+      "fecha_entrada": "2026-04-01",
+      "stop_loss_usd": 0,
+      "target_usd": 0,
+      "tesis": "Turnaround bajo nuevo CEO Elliott Hill - POSICION EN REVISION"
+    }
+  ],
+
+  "cauciones_ars": {
+    "monto_ars": 0,
+    "tasa_anual_pct": 0,
+    "vencimiento": "",
+    "_nota": "Completar si tenés cauciones activas"
+  },
+
+  "operaciones_cerradas_junio": [
+    {"ticker": "NVDA", "tipo": "round_trip", "entrada": 9.20, "salida": 8.40, "cantidad": 106, "resultado_usd": -84.8},
+    {"ticker": "GOOGL", "tipo": "round_trip", "entrada": 6.58, "salida": 6.05, "cantidad": 149, "resultado_usd": -79.0},
+    {"ticker": "SPY", "tipo": "round_trip", "entrada": 13.04, "salida": 12.59, "cantidad": 379, "resultado_usd": -170.6},
+    {"ticker": "SPCE", "tipo": "round_trip", "entrada": 7.89, "salida": 7.00, "cantidad": 60, "resultado_usd": -53.4},
+    {"ticker": "INTC", "tipo": "parcial", "entrada_ars": 42291, "salida_ars": 31140, "cantidad": 34, "resultado_usd": -300},
+    {"ticker": "GGAL", "tipo": "swing", "resultado_usd": -80, "_nota": "estimado"}
+  ]
+}
