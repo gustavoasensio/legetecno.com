@@ -61,7 +61,7 @@
     {"ticker": "GOOGL", "tipo": "round_trip", "entrada": 6.58, "salida": 6.05, "cantidad": 149, "resultado_usd": -79.0},
     {"ticker": "SPY", "tipo": "round_trip", "entrada": 13.04, "salida": 12.59, "cantidad": 379, "resultado_usd": -170.6},
     {"ticker": "SPCE", "tipo": "round_trip", "entrada": 7.89, "salida": 7.00, "cantidad": 60, "resultado_usd": -53.4},
-    {"ticker": "INTC", "tipo": "parcial", "entrada_ars": 42291, "salida_ars": 31140, "cantidad": 34, "resultado_usd": -300},
+    {"ticker": "INTC", "tipo": "posicion_completa_cerrada", "entrada_ars": 42291, "salida_ars": 31140, "cantidad_original": 221, "resultado_usd": -1546, "_nota": "Posición cerrada al 100%. Precio salida pendiente de confirmar."},
     {"ticker": "GGAL", "tipo": "swing", "resultado_usd": -80, "_nota": "estimado"}
   ]
 }
